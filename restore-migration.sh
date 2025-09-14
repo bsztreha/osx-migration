@@ -170,7 +170,11 @@ for archive in "${ARCHIVES[@]}"; do
         done | head -5 > "$TEMP_DIR/conflicts_${category_name}.txt"; then
             if [ -s "$TEMP_DIR/conflicts_${category_name}.txt" ]; then
                 conflicts=true
-                mapfile -t conflict_items < "$TEMP_DIR/conflicts_${category_name}.txt"
+                # Read conflicts into array (bash 3.2 compatible)
+                conflict_items=()
+                while IFS= read -r line; do
+                    conflict_items+=("$line")
+                done < "$TEMP_DIR/conflicts_${category_name}.txt"
             fi
         fi
 
