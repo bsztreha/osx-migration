@@ -38,13 +38,18 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Define category descriptions
-declare -A CATEGORY_DESCRIPTIONS
-CATEGORY_DESCRIPTIONS["user-dirs"]="📁 Documents, Downloads, Desktop"
-CATEGORY_DESCRIPTIONS["shell-config"]="🔧 Oh My Zsh, .zshrc, .zprofile"
-CATEGORY_DESCRIPTIONS["credentials"]="🔑 SSH keys, AWS, GPG, etc."
-CATEGORY_DESCRIPTIONS["git-config"]="🔧 Git configuration files"
-CATEGORY_DESCRIPTIONS["network-config"]="🌐 Cisco VPN configurations"
+# Define category descriptions (compatible with bash 3.2)
+# Note: user-dirs are handled by restore-user-dirs.sh
+get_category_description() {
+    local category=$1
+    case "$category" in
+        "shell-config") echo "🔧 Oh My Zsh, .zshrc, .zprofile" ;;
+        "credentials") echo "🔑 SSH keys, AWS, GPG, etc." ;;
+        "git-config") echo "🔧 Git configuration files" ;;
+        "network-config") echo "🌐 Cisco VPN configurations" ;;
+        *) echo "❓ Unknown category" ;;
+    esac
+}
 
 echo -e "${YELLOW}Starting migration restore on ARM Mac...${NC}"
 
@@ -103,13 +108,14 @@ if [ "$LIST_ONLY" = true ]; then
         archive_name=$(basename "$archive")
         category_name="${archive_name%.tar.gz}"
         archive_size=$(du -h "$archive" | cut -f1)
-        description="${CATEGORY_DESCRIPTIONS[$category_name]:-"Unknown category"}"
+        description="$(get_category_description "$category_name")"
         echo -e "  ${GREEN}$category_name${NC} (${archive_size}) - $description"
     done
     echo -e "\n${YELLOW}Usage examples:${NC}"
     echo -e "  ./restore-migration.sh --dry-run              # Preview all"
-    echo -e "  ./restore-migration.sh user-dirs              # Restore just user directories"
     echo -e "  ./restore-migration.sh shell-config           # Restore just shell config"
+    echo -e "  ./restore-migration.sh credentials            # Restore just credentials"
+    echo -e "\n${YELLOW}Note:${NC} User directories (Documents, Downloads, Desktop) are handled by restore-user-dirs.sh"
     exit 0
 fi
 
@@ -132,7 +138,7 @@ for archive in "${ARCHIVES[@]}"; do
     progress=$((current_archive * 100 / total_archives))
 
     echo -e "${YELLOW}Processing [$current_archive/$total_archives] ($progress%): $category_name${NC}"
-    description="${CATEGORY_DESCRIPTIONS[$category_name]:-"Unknown category"}"
+    description="$(get_category_description "$category_name")"
     echo -e "  $description"
 
     if [ "$DRY_RUN" = true ]; then
@@ -203,14 +209,6 @@ for archive in "${ARCHIVES[@]}"; do
             # Fix ownership to current user (handles UID mismatch between Intel/ARM Macs)
             echo -e "  Fixing file ownership..."
             case "$category_name" in
-                "user-dirs")
-                    # Fix ownership for user directories
-                    for item in Documents Downloads Desktop; do
-                        if [ -d "$HOME/$item" ]; then
-                            chown -R "$CURRENT_USER:staff" "$HOME/$item" 2>/dev/null || true
-                        fi
-                    done
-                    ;;
                 "shell-config")
                     # Fix ownership for shell config files
                     for item in .oh-my-zsh .zshrc .zprofile; do
