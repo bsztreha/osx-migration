@@ -40,11 +40,11 @@ Backs up standard macOS user directories.
 Comprehensive migration backup for Intel → ARM Mac transition.
 
 - **Categories**:
-  - `user-dirs`: Documents, Downloads, Desktop
   - `shell-config`: Oh My Zsh, .zshrc, .zprofile
   - `credentials`: SSH keys, AWS, GPG, etc.
   - `git-config`: Git configuration files
   - `network-config`: Cisco VPN configurations
+- **Note**: User directories (Documents, Downloads, Desktop) are handled separately by `backup-user-dirs.sh`
 - **Output**: `/Volumes/YOUR_MOUNT_POINT/backup-migration/`
 - **Features**: UID detection, architecture-safe selection
 
@@ -113,8 +113,7 @@ These scripts are specifically designed to handle the migration from Intel Macs 
 /Volumes/YOUR_MOUNT_POINT/
 ├── backup-work/        # Work directories (project folders)
 ├── backup-user/        # User directories (Documents, Downloads, Desktop)
-└── backup-migration/   # Complete migration backup
-    ├── user-dirs.tar.gz
+└── backup-migration/   # Configuration and credentials backup
     ├── shell-config.tar.gz
     ├── credentials.tar.gz
     ├── git-config.tar.gz

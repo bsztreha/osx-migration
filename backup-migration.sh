@@ -40,23 +40,33 @@ format_bytes() {
     fi
 }
 
-# Define migration categories
-declare -A MIGRATION_CATEGORIES
-
-# User directories (existing logic)
-MIGRATION_CATEGORIES["user-dirs"]="Documents Downloads Desktop"
+# Define migration categories using regular variables (compatible with bash 3.2)
+# Note: user-dirs (Documents, Downloads, Desktop) are handled by backup-user-dirs.sh
+CATEGORIES=("shell-config" "credentials" "git-config" "network-config")
 
 # Shell configuration
-MIGRATION_CATEGORIES["shell-config"]=".oh-my-zsh .zshrc .zprofile"
+shell_config=".oh-my-zsh .zshrc .zprofile"
 
 # Credentials and keys
-MIGRATION_CATEGORIES["credentials"]=".ssh .aws .gnupg .boto"
+credentials=".ssh .aws .gnupg .boto"
 
 # Git configuration
-MIGRATION_CATEGORIES["git-config"]=".gitconfig .gitignore_global .hgignore_global"
+git_config=".gitconfig .gitignore_global .hgignore_global"
 
 # Network configurations
-MIGRATION_CATEGORIES["network-config"]=".cisco"
+network_config=".cisco"
+
+# Function to get category items by name
+get_category_items() {
+    local category=$1
+    case "$category" in
+        "shell-config") echo "$shell_config" ;;
+        "credentials") echo "$credentials" ;;
+        "git-config") echo "$git_config" ;;
+        "network-config") echo "$network_config" ;;
+        *) echo "" ;;
+    esac
+}
 
 echo -e "${YELLOW}Starting Intel to ARM Mac migration backup...${NC}"
 
@@ -107,20 +117,15 @@ total_categories=0
 total_original_size=0
 processed_size=0
 
-for category in "${!MIGRATION_CATEGORIES[@]}"; do
-    items="${MIGRATION_CATEGORIES[$category]}"
+for category in "${CATEGORIES[@]}"; do
+    items="$(get_category_items "$category")"
 
     echo -e "${YELLOW}Measuring category: $category${NC}"
     category_size=0
 
     for item in $items; do
-        if [ "$category" = "user-dirs" ]; then
-            # User directories are in home root
-            path="$HOME/$item"
-        else
-            # Config items are in home root
-            path="$HOME/$item"
-        fi
+        # Config items are in home root
+        path="$HOME/$item"
 
         if [ -e "$path" ]; then
             if [ -d "$path" ]; then
@@ -160,8 +165,8 @@ processed_size=0
 echo -e "${YELLOW}Starting backup process...${NC}"
 
 # Process each category
-for category in "${!MIGRATION_CATEGORIES[@]}"; do
-    items="${MIGRATION_CATEGORIES[$category]}"
+for category in "${CATEGORIES[@]}"; do
+    items="$(get_category_items "$category")"
     archive_name="${category}.tar.gz"
     temp_archive="$TEMP_DIR/$archive_name"
     current_category=$((processed + 1))
@@ -271,7 +276,6 @@ if [ $processed -gt 0 ]; then
     echo -e "Total data size: $(format_bytes $total_original_size)"
     echo -e "Categories backed up: $processed"
     echo -e "\n${YELLOW}=== BACKUP CONTENTS ===${NC}"
-    echo -e "📁 user-dirs.tar.gz     - Documents, Downloads, Desktop"
     echo -e "🔧 shell-config.tar.gz  - Oh My Zsh, .zshrc, .zprofile"
     echo -e "🔑 credentials.tar.gz   - SSH keys, AWS, GPG, etc."
     echo -e "🔧 git-config.tar.gz    - Git configuration files"
