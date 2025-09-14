@@ -43,7 +43,7 @@ NC='\033[0m' # No Color
 get_category_description() {
     local category=$1
     case "$category" in
-        "shell-config") echo "🔧 Oh My Zsh, .zshrc, .zprofile" ;;
+        "shell-config") echo "🔧 Shell configs (.zshrc, .profile, .bashrc, etc.)" ;;
         "credentials") echo "🔑 SSH keys, AWS, GPG, etc." ;;
         "git-config") echo "🔧 Git configuration files" ;;
         "network-config") echo "🌐 Cisco VPN configurations" ;;
@@ -215,7 +215,7 @@ for archive in "${ARCHIVES[@]}"; do
             case "$category_name" in
                 "shell-config")
                     # Fix ownership for shell config files
-                    for item in .oh-my-zsh .zshrc .zprofile; do
+                    for item in .oh-my-zsh .zshrc .zprofile .profile .bashrc .bash_profile; do
                         if [ -e "$HOME/$item" ]; then
                             chown -R "$CURRENT_USER:staff" "$HOME/$item" 2>/dev/null || true
                         fi

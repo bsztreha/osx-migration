@@ -45,7 +45,7 @@ format_bytes() {
 CATEGORIES=("shell-config" "credentials" "git-config" "network-config")
 
 # Shell configuration
-shell_config=".oh-my-zsh .zshrc .zprofile"
+shell_config=".oh-my-zsh .zshrc .zprofile .profile .bashrc .bash_profile"
 
 # Credentials and keys
 credentials=".ssh .aws .gnupg .boto"
@@ -276,7 +276,7 @@ if [ $processed -gt 0 ]; then
     echo -e "Total data size: $(format_bytes $total_original_size)"
     echo -e "Categories backed up: $processed"
     echo -e "\n${YELLOW}=== BACKUP CONTENTS ===${NC}"
-    echo -e "🔧 shell-config.tar.gz  - Oh My Zsh, .zshrc, .zprofile"
+    echo -e "🔧 shell-config.tar.gz  - Shell configs (.zshrc, .profile, .bashrc, etc.)"
     echo -e "🔑 credentials.tar.gz   - SSH keys, AWS, GPG, etc."
     echo -e "🔧 git-config.tar.gz    - Git configuration files"
     echo -e "🌐 network-config.tar.gz - Cisco VPN configurations"
