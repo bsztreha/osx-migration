@@ -282,6 +282,59 @@ tar -tzf backup-file.tar.gz | head -5
 
 MIT License - Feel free to modify and distribute.
 
+## Custom Keyboard Layouts
+
+The `keylayouts/` directory contains custom keyboard layout files for macOS that can be installed to provide additional input methods.
+
+### Available Layouts
+
+- **Hungarian WIN.keylayout** - Hungarian keyboard layout with Windows-style key mappings
+- **Hungarian_Win.keylayout** - Alternative Hungarian Windows-style layout
+
+### Installation
+
+**User-level installation** (recommended):
+```bash
+# Create directory if it doesn't exist (optional, macOS will create it)
+mkdir -p ~/Library/Keyboard\ Layouts/
+
+# Copy specific layout files
+cp keylayouts/"Hungarian WIN.keylayout" ~/Library/Keyboard\ Layouts/
+cp keylayouts/"Hungarian_Win.keylayout" ~/Library/Keyboard\ Layouts/
+```
+
+**System-wide installation** (requires admin):
+```bash
+# Copy specific layouts
+sudo cp keylayouts/"Hungarian WIN.keylayout" /Library/Keyboard\ Layouts/
+sudo cp keylayouts/"Hungarian_Win.keylayout" /Library/Keyboard\ Layouts/
+```
+
+### Activation
+
+1. **Open System Settings** → Keyboard → Input Sources
+2. **Add new layout**: Click "+" and look in "Others" section
+3. **Switch layouts**: Use `Cmd + Space` or input menu in menu bar
+
+**Note**: Log out and log back in after installation for layouts to appear in System Settings.
+
+### Migration Integration
+
+Custom keyboard layouts are **not automatically included** in the current migration scripts. To migrate keyboard layouts to a new Mac:
+
+1. **Manual backup** on source Mac:
+   ```bash
+   tar -czf keyboard-layouts.tar.gz -C ~/ "Library/Keyboard Layouts"
+   cp keyboard-layouts.tar.gz /Volumes/YOUR_MOUNT_POINT/
+   ```
+
+2. **Manual restore** on target Mac:
+   ```bash
+   tar -xzf /Volumes/YOUR_MOUNT_POINT/keyboard-layouts.tar.gz -C ~/
+   ```
+
+3. **Or simply copy** the layout files from this repository and install as described above
+
 ## Contributing
 
 This is a personal migration toolkit developed with Claude's assistance, but suggestions and improvements are welcome.
