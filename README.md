@@ -53,6 +53,19 @@ Comprehensive migration backup for Intel → ARM Mac transition.
 ./backup-migration.sh            # Full migration backup
 ```
 
+#### `backup-app-config.sh`
+Backs up application configurations from ~/Library/Application Support.
+
+- **Target**: Individual application folders in `~/Library/Application Support`
+- **Output**: `/Volumes/YOUR_MOUNT_POINT/backup-app-config/`
+- **Features**: Individual .tar.gz files per application, system directory filtering, cache exclusion
+- **Exclusions**: System directories, caches, logs, .DS_Store files
+
+```bash
+./backup-app-config.sh --dry-run  # Preview
+./backup-app-config.sh            # Full app config backup
+```
+
 ### Restore Scripts
 
 #### `restore-work-dirs.sh`
@@ -83,6 +96,20 @@ Restores migration backup on new ARM Mac.
 ./restore-migration.sh shell-config          # Restore specific category
 ```
 
+#### `restore-app-config.sh`
+Restores application configurations to ~/Library/Application Support.
+
+- **Source**: `/Volumes/YOUR_MOUNT_POINT/backup-app-config/`
+- **Target**: `~/Library/Application Support/`
+- **Features**: Conflict detection, selective restore, automatic ownership fixes, UID/GID handling
+
+```bash
+./restore-app-config.sh --list               # List available app configs
+./restore-app-config.sh --dry-run            # Preview restore
+./restore-app-config.sh                      # Restore all app configs
+./restore-app-config.sh "Visual Studio Code" # Restore specific app
+```
+
 ## Architecture Considerations
 
 ### Intel to ARM Migration
@@ -101,6 +128,7 @@ These scripts are specifically designed to handle the migration from Intel Macs 
 - Credentials and keys (SSH, AWS, GPG)
 - Git configurations
 - Network configurations (VPN profiles)
+- Application configurations and preferences
 
 ❌ **Not migrated** (fresh install recommended):
 - Applications (architecture-specific)
@@ -113,11 +141,16 @@ These scripts are specifically designed to handle the migration from Intel Macs 
 /Volumes/YOUR_MOUNT_POINT/
 ├── backup-work/        # Work directories (project folders)
 ├── backup-user/        # User directories (Documents, Downloads, Desktop)
-└── backup-migration/   # Configuration and credentials backup
-    ├── shell-config.tar.gz
-    ├── credentials.tar.gz
-    ├── git-config.tar.gz
-    └── network-config.tar.gz
+├── backup-migration/   # Configuration and credentials backup
+│   ├── shell-config.tar.gz
+│   ├── credentials.tar.gz
+│   ├── git-config.tar.gz
+│   └── network-config.tar.gz
+└── backup-app-config/  # Application configurations
+    ├── Visual_Studio_Code.tar.gz
+    ├── Firefox.tar.gz
+    ├── Slack.tar.gz
+    └── [other-app-configs].tar.gz
 ```
 
 ## Prerequisites
@@ -152,10 +185,11 @@ mount -t smbfs -o guest smb://192.168.1.100/backup /Volumes/backup
    ./backup-migration.sh --dry-run  # Preview
    ./backup-migration.sh            # Execute
    ```
-3. **Optional work/user directory backups**:
+3. **Optional work/user/app directory backups**:
    ```bash
    ./backup-work-dirs.sh
    ./backup-user-dirs.sh
+   ./backup-app-config.sh
    ```
 
 ### ARM Mac (Target)
@@ -164,14 +198,17 @@ mount -t smbfs -o guest smb://192.168.1.100/backup /Volumes/backup
 2. **List available backups**:
    ```bash
    ./restore-migration.sh --list
+   ./restore-app-config.sh --list      # If app configs were backed up
    ```
 3. **Preview restore**:
    ```bash
    ./restore-migration.sh --dry-run
+   ./restore-app-config.sh --dry-run   # If app configs were backed up
    ```
 4. **Execute restore**:
    ```bash
    ./restore-migration.sh
+   ./restore-app-config.sh             # If app configs were backed up
    ```
 5. **Follow post-restore recommendations**
 
@@ -213,6 +250,8 @@ After running the migration scripts:
    - Docker/OrbStack (fresh install)
 4. **Test SSH connections** to verify key restoration
 5. **Reconnect VPNs** using restored configurations
+6. **Launch applications** to verify restored configurations
+7. **Re-authenticate applications** as needed (some may require fresh login)
 
 ## Troubleshooting
 
